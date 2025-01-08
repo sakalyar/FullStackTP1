@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  shop-server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shop_db
+      SPRING_DATASOURCE_USERNAME: yarsak
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: shop_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: shopdb
+      POSTGRES_USER: yarsak
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
