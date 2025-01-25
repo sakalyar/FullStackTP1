@@ -58,4 +58,17 @@ public class CategoryController {
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getCategoryById(id));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<Category>> searchCategories(
+            @RequestParam(required = false) Boolean isRoot,
+            @RequestParam(required = false) Date afterDate,
+            @RequestParam(required = false) Date beforeDate,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection,
+            Pageable pageable) {
+        Page<Category> categories = service.getCategoriesByFilterAndSort(isRoot, afterDate, beforeDate, sortBy, sortDirection, pageable);
+        return ResponseEntity.ok(categories);
+    }
+
 }

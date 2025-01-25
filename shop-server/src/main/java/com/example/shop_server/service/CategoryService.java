@@ -4,7 +4,9 @@ import com.example.shop_server.model.Category;
 import com.example.shop_server.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -71,4 +73,21 @@ public class CategoryService {
     public Category getCategoryById(Long id) {
         return repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Category not found."));
     }
+
+    public Page<Category> getCategoriesByFilterAndSort(Boolean isRoot, Date afterDate, Date beforeDate, String sortBy, String sortDirection, Pageable pageable) {
+    Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+            sortDirection.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending());
+
+    if (isRoot != null) {
+        return isRoot ? repository.findByParentIsNull(sortedPageable) : repository.findByParentIsNotNull(sortedPageable);
+    } else if (afterDate != null && beforeDate != null) {
+        return repository.findByCreatedAtBetween(afterDate, beforeDate, sortedPageable);
+    } else if (afterDate != null) {
+        return repository.findByCreatedAtAfter(afterDate, sortedPageable);
+    } else if (beforeDate != null) {
+        return repository.findByCreatedAtBefore(beforeDate, sortedPageable);
+    }
+    return repository.findAll(sortedPageable);
+}
+
 }

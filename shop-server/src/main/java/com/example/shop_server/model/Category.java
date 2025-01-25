@@ -1,18 +1,10 @@
 package com.example.shop_server.model;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
-// import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,12 +20,14 @@ public class Category {
     @NotNull(message = "Category name is required.")
     private String name;
 
+    @JsonBackReference // Prevent infinite recursion for parent
     @ManyToOne
     @JoinColumn(name = "parent_id")
-    private Category parent; // Parent category
+    private Category parent;
 
+    @JsonManagedReference // Allow serialization of children
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Category> children = new ArrayList<>(); // Child categories
+    private List<Category> children = new ArrayList<>();
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(nullable = false, updatable = false)
@@ -42,6 +36,8 @@ public class Category {
     public Category() {
         this.createdAt = new Date();
     }
+
+    // Getters and Setters...
 
     public Long getId() {
         return id;
