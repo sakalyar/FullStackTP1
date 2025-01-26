@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./shop-client  # Adjusted context to shop-client
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "4200:80"  # Map port 4200 on your host to port 80 in the container
+    volumes:
+      - ./shop-client:/app
+    environment:
+      - NODE_ENV=production
+
+  backend:
+    build:
+      context: ./shop-server  # Adjusted context to shop-server
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shopdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+    volumes:
+      - ./shop-server:/app
+    depends_on:
+      - db
+
+  db:
+    image: postgres:15
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=shopdb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+    driver: local
